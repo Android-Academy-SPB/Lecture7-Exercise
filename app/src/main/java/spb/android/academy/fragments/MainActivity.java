@@ -22,13 +22,15 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
     viewPager = findViewById(R.id.activity_main_view_pager);
 
-    initViewPager();
     NetworkManager.getApiInstance().getFeaturedCollections().enqueue(new Callback<List<Collection>>() {
       @Override
       public void onResponse(@NonNull Call<List<Collection>> call, @NonNull Response<List<Collection>> response) {
         List<Collection> collections = response.body();
         if (collections != null) {
-          Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
+          for (Collection collection : collections) {
+            CollectionsRepository.getInstance().save(collection);
+          }
+          setupViewPagerAdapter();
         } else {
           showErrorMessage();
         }
@@ -40,12 +42,13 @@ public class MainActivity extends AppCompatActivity {
     });
   }
 
-  private void initViewPager() {
-    List<CollectionFragment> fragments = new ArrayList<>();
-    fragments.add(CollectionFragment.newInstance(1));
-    fragments.add(CollectionFragment.newInstance(2));
-    fragments.add(CollectionFragment.newInstance(3));
-    CollectionsPagerAdapter adapter = new CollectionsPagerAdapter(getSupportFragmentManager(), fragments);
+  private void setupViewPagerAdapter() {
+    final List<Collection> collections = CollectionsRepository.getInstance().getAll();
+    final List<CollectionFragment> fragments = new ArrayList<>();
+    for (Collection collection : collections) {
+      fragments.add(CollectionFragment.newInstance(collection.getId()));
+    }
+    final CollectionsPagerAdapter adapter = new CollectionsPagerAdapter(getSupportFragmentManager(), fragments);
     viewPager.setAdapter(adapter);
   }
 
