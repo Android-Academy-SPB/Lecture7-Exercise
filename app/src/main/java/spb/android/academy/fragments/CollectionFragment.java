@@ -1,5 +1,6 @@
 package spb.android.academy.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,7 +14,13 @@ import com.squareup.picasso.Picasso;
 import spb.android.academy.fragments.domain.Collection;
 
 public class CollectionFragment extends Fragment {
-  private static final String ARGS_COLLECTION_ID = "args:collection_id";
+  public static final String ARG_COLLECTION_ID = "arg:collection_id";
+
+  public interface CollectionFragmentListener {
+    void onPreviewCollection(int collectionId);
+  }
+
+  private CollectionFragmentListener listener;
 
   private TextView nameTextView;
   private TextView descriptionTextView;
@@ -23,7 +30,7 @@ public class CollectionFragment extends Fragment {
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    final int collectionId = getArguments().getInt(ARGS_COLLECTION_ID);
+    final int collectionId = getArguments().getInt(ARG_COLLECTION_ID);
     collection = CollectionsRepository.getInstance().getById(collectionId);
   }
 
@@ -40,16 +47,37 @@ public class CollectionFragment extends Fragment {
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+
     nameTextView.setText(collection.getTitle());
     descriptionTextView.setText(collection.getDescription());
     final String imageUrl = collection.getPreviewPhotos().get(0).getUrlForSmall();
     Picasso.get().load(imageUrl).into(previewImage);
+
+    previewImage.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        if (listener != null) {
+          listener.onPreviewCollection(collection.getId());
+        }
+      }
+    });
+  }
+
+  @Override public void onAttach(Context context) {
+    super.onAttach(context);
+    if (context instanceof CollectionFragmentListener) {
+      listener = (CollectionFragmentListener) context;
+    }
+  }
+
+  @Override public void onDetach() {
+    super.onDetach();
+    listener = null;
   }
 
   public static CollectionFragment newInstance(int collectionId) {
     final CollectionFragment fragment = new CollectionFragment();
     final Bundle bundle = new Bundle();
-    bundle.putInt(ARGS_COLLECTION_ID, collectionId);
+    bundle.putInt(ARG_COLLECTION_ID, collectionId);
     fragment.setArguments(bundle);
     return fragment;
   }
