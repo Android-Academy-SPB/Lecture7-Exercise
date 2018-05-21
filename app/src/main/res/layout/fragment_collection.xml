@@ -5,8 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:background="#000000"
-    >
+    tools:background="#000000">
 
   <TextView
       android:id="@+id/fragment_collection_name"
