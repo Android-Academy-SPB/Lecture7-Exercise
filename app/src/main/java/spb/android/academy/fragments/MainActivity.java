@@ -22,13 +22,19 @@ public class MainActivity extends AppCompatActivity implements CollectionFragmen
 
   private void openFragment(Fragment fragment, boolean addToBackStack) {
     final FragmentTransaction transaction = getSupportFragmentManager()
-        .beginTransaction()
-        .replace(R.id.content, fragment);
+        .beginTransaction();
 
     if (addToBackStack) {
-      transaction.addToBackStack(null);
+      transaction
+          .addToBackStack(null)
+          .setCustomAnimations(
+              R.anim.slide_in_right, R.anim.slide_out_left,
+              R.anim.slide_in_left, R.anim.slide_out_right
+          );
     }
 
-    transaction.commit();
+    transaction
+        .replace(R.id.content, fragment)
+        .commit();
   }
 }
